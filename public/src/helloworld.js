@@ -18,7 +18,7 @@ var MovieTable = React.createClass({
 	getWallPosts: function(groupName) {	  
 
 	       		var count = 100;
-
+				var self = this;
    				getCountPostsFromWall(groupName)
 
    				.then((countPosts) => {
@@ -32,16 +32,17 @@ var MovieTable = React.createClass({
    					}
 
    					var arr = Array.apply(null, Array(Math.ceil(res/count)));
+   					
 
    					return arr.reduce(function(chain, element, index) {
    						return chain.then(function(result) {
 
    								sortMoviesByLikes(result);
 
-   								  if (this.state.movies.length === 0) {		                     
-			                        	this.setState({movies: result.slice(0,20)});
+   								  if (self.state.movies.length === 0) {		                     
+			                        	self.setState({movies: result.slice(0,20)});
 	                    			} else {
-			                        this.setState({movies: chooseTop10(this.state.movies, result)});
+			                        self.setState({movies: chooseTop10(self.state.movies, result)});
 		                    	  }
 
    							   return getPostsFromWallWithPause(groupName,count,index*count + count);
@@ -51,9 +52,9 @@ var MovieTable = React.createClass({
 
    				.then((result)=> {
    					sortMoviesByLikes(result);
-   				     this.setState({movies: result.slice(1)});
+   				     self.setState({movies: result.slice(1)});
    				})
-   				.catch(console.error);   	   
+   				.catch(console.error.bind(window));	   
 	    	 },
 
 	componentDidMount: function() {
