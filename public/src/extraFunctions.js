@@ -72,7 +72,6 @@ var chooseTop10 = function(firstArray, secondArray) {
         var right = isNeedWord(header) && header.length<=120;
         return right;
     }
-
 	function delay() {
 		return new Promise((resolve) => {
 			setTimeout(resolve, 400);
@@ -88,8 +87,8 @@ var chooseTop10 = function(firstArray, secondArray) {
 	function sortMoviesByLikes(arr) {
      return  arr.sort(function(first, second) {
         return second.likes.count - first.likes.count;
-     }).filter(function(element) {
+     }).filter(function(movie) {
 
-        return (element.text && checkDescription(element) && checkHeader(element));
+        return (movie.text && checkDescription(movie) && checkHeader(movie));
      });
 	}
