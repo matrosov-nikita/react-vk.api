@@ -1,0 +1,14 @@
+input {
+	margin-right: 20px;
+	width: 50% !important
+}
+form {
+	margin-bottom: 20px;
+}
+#box {
+	margin-top: 10px;
+}
+.likes {
+	font-weight: bold;
+	text-align: center;
+}

@@ -8,7 +8,6 @@ var sendRequestVkAPI = (reqName, params, callback) => {
 
 var greet  = () => {
   sendRequestVkAPI('users.get',{}, (res)=> {
-  	alert(res[0].first_name);
   });
 }
 
@@ -37,8 +36,8 @@ var chooseTop10 = function(firstArray, secondArray) {
 
 
     var countIteration = 20;
-    for (var i = 0; i < countIteration; i++) {
-        if (!secondArray[secondIndex] || firstArray[firstIndex].likes.count > secondArray[secondIndex].likes.count) {
+   while(firstIndex+secondIndex<countIteration) {
+        if (firstArray[firstIndex] && firstArray[firstIndex].likes.count > secondArray[secondIndex].likes.count) {
             if (!existMovieString(result,firstArray[firstIndex])) result.push(firstArray[firstIndex]); 
             firstIndex++;
         } else {
@@ -52,7 +51,7 @@ var chooseTop10 = function(firstArray, secondArray) {
 
 
     var unnecessaryWords = ['лайк','лойз','самых','стен','подборка','фильм','паблик',
-    'подписчик','ужас','like','посмотрим сколько нас','на фотографии','http'];
+    'подписчик','ужас','like','посмотрим сколько нас','на фотографии','http','сообществ','18+','кинг'];
     var uppercaseUnnecessaryWords = unnecessaryWords.map((word)=>word.toUpperCase());
 
     function isNeedWord(movieString) {
@@ -64,7 +63,15 @@ var chooseTop10 = function(firstArray, secondArray) {
         return true;
     }
 
+    function checkDescription(movie) {
+      return movie.text.split('<br>').length > 1 && movie.text.length<=2500;
+    }
 
+    function checkHeader(movie) {
+        var header = movie.text.split('<br>')[0];
+        var right = isNeedWord(header) && header.length<=120;
+        return right;
+    }
 
 	function delay() {
 		return new Promise((resolve) => {
@@ -79,10 +86,10 @@ var chooseTop10 = function(firstArray, secondArray) {
 	}
 
 	function sortMoviesByLikes(arr) {
-
-     arr = arr.sort(function(first, second) {
+     return  arr.sort(function(first, second) {
         return second.likes.count - first.likes.count;
      }).filter(function(element) {
-        return element.text && isNeedWord(element.text.split('<br>')[0]);
+
+        return (element.text && checkDescription(element) && checkHeader(element));
      });
 	}

@@ -1,28 +1,75 @@
+
+var ProgressBar = React.createClass({ 
+        render: function() {
+            return 
+            (
+            <div class="progress">
+              <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar"
+               aria-valuemin="0" aria-valuemax="100" style="width:40%">
+                {this.props.loadPercent}
+              </div>
+            </div>
+            )
+        }
+})
+
+var MovieForm = React.createClass({
+
+    getInitialState: function() {
+        return {
+            name: ""  
+        };
+    },
+    handleSubmit: function(e) {
+        e.preventDefault();
+        var groupName = this.state.name.trim();
+        this.props.handleSubmitGroupName(groupName);
+    },
+    handleChangeName: function(e) {
+        this.setState({name: e.target.value})
+    },
+    render: function() {
+        return (
+            <div className="container">
+                <form onSubmit={this.handleSubmit} className="row">
+                    <input type="text" onChange={this.handleChangeName} className="col-md-4 form-control" placeholder="Название группы"/>
+                    <button type="submit" className="btn btn-primary">Поиск</button>
+                </form>
+            </div>       
+            )
+    }
+});
+
 var MovieRow = React.createClass({
     render: function() {
-        alert("start render");
         return (
-            <tr>
-                <td> {this.props.movie.name} </td>
-                <td> {this.props.movie.description} </td>
-            </tr>
+                  <tr className="row">
+                <td className="col-md-4"> {this.props.movie.text.split('<br>')[0]} </td>
+                <td className="col-md-2"> <img src={this.props.movie.attachment.photo.src} alt="poster"/></td>
+                <td className="col-md-4"> {this.props.movie.text.split('<br>').slice(1)}</td>
+                <td className="col-md-2 likes"> {this.props.movie.likes.count} </td>         
+                    </tr>           
+          
             )
     }
 });
 
 var MovieTable = React.createClass({
     getInitialState: function() {
-        return {movies: [] }
+        return {
+            movies: [],
+            currentLoadPercent: 0
+             }
     },
 
     getWallPosts: function(groupName) {   
 
                 var count = 100;
                 var self = this;
+
                 getCountPostsFromWall(groupName)
 
                 .then((countPosts) => {
-                    alert("dsadasd");
                     return countPosts[0];
 
                 })
@@ -37,47 +84,50 @@ var MovieTable = React.createClass({
 
                     return arr.reduce(function(chain, element, index) {
                         return chain.then(function(result) {
-
-                                sortMoviesByLikes(result);
-
+                            result = result.slice(1);
+                                result = sortMoviesByLikes(result);
                                   if (self.state.movies.length === 0) {                          
                                         self.setState({movies: result.slice(0,20)});
+                                        this.setState({currentLoadPercent: count/res*100}) 
                                     } else {
-                                    self.setState({movies: chooseTop10(self.state.movies, result)});
+                                    self.setState({movies: chooseTop10(self.state.movies, result.slice(0))});
+                                    var currentLoadValue = this.state.currentLoadPercent;
+                                    this.setState({currentLoadPercent: currentLoadValue + count/res*100})
                                   }
 
                                return getPostsFromWallWithPause(groupName,count,index*count + count);
                         })
                     }, getPostsFromWall(groupName, count, 0));
                 })
-
-                .then((result)=> {
-                    sortMoviesByLikes(result);
-                     self.setState({movies: result.slice(1)});
-                })
                 .catch(console.error.bind(console));       
              },
-
-    componentDidMount: function() {
-        this.getWallPosts('nightmares');
+    
+    handleSubmitGroupName: function(groupName) {
+        this.getWallPosts(groupName);
     },
 
     render: function() {
         var movieRows = this.state.movies.map((movie)=> {
             return (
                 <MovieRow movie={movie} key={movie.id} />
-            )
+                )
         })
         return (
+            <div className="container">
+            <ProgressBar loadPercent={this.state.currentLoadPercent}/>
+            <MovieForm handleSubmitGroupName={this.handleSubmitGroupName}/>
             <table className="table table-striped">
-                <thead>
-                    <th>Название</th>
-                    <th>Описание</th>
+                <thead className="row">
+                    <th className="col-md-4">Название</th>
+                    <th className="col-md-2">Постер</th>
+                    <th className="col-md-4">Описание</th>
+                    <th className="col-md-2 likes">Лайки</th>
                 </thead>
-                <tbody>
+                <tbody className="container">
                     {movieRows}
                 </tbody>
             </table>
+             </div>
         )
     }
 })
